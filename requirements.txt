@@ -2,6 +2,7 @@ certifi==2021.10.8
 charset-normalizer==2.0.7
 idna==3.3
 kucoin-python==1.0.9
+loguru==0.5.3
 python-dotenv==0.19.1
 redis==3.5.3
 requests==2.26.0

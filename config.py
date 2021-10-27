@@ -7,13 +7,13 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent
 
 if os.environ.get('ENV') == 'test':
+    LOGGING_LEVEL = "DEBUG"
     filepath = os.path.join(BASE_DIR, ".env.test")
 else:
+    LOGGING_LEVEL = "INFO"
     filepath = os.path.join(BASE_DIR, ".env")
 
 load_dotenv(filepath)
-
-is_sandbox = True if os.environ.get('ENV') == 'test' else False
 
 API_KEY = os.environ.get('API_KEY')
 API_SECRET = os.environ.get('API_SECRET')
