@@ -41,6 +41,7 @@ class LendHandler:
         for order_id in orders_ids:
             try:
                 self.margin_api.cancel_lend_order(order_id)
+                logger.info(f"Order {order_id} cancelled.")
             except Exception as e:
                 logger.error(f"Cannot cancel {order_id=}: {e}")
 
