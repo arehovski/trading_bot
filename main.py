@@ -8,9 +8,9 @@ from loguru import logger
 from kucoin.client import Margin, User
 from redis import Redis
 
-from config import API_KEY, API_SECRET, API_PASSPHRASE, BASE_DIR, LOGGING_LEVEL
+from config import API_KEY, API_SECRET, API_PASSPHRASE, BASE_DIR, LOGGING_LEVEL, MAIL_ADDRESS
 from connections import get_redis_connection
-from utils import get_items_from_paginated_result
+from utils import get_items_from_paginated_result, send_mail
 
 
 logger.add(sink=os.path.join(BASE_DIR, 'logs', "kucoin_lend.log"), level=LOGGING_LEVEL, rotation="5 MB")
@@ -23,6 +23,7 @@ class LendHandler:
     term: int = 7
     currency: str = "USDT"
     account_type: str = "main"
+    min_order_quantity = Decimal('10')
     redis: Redis = get_redis_connection()
 
     def get_lend_daily_rate(self) -> Decimal:
@@ -47,7 +48,15 @@ class LendHandler:
 
     def get_order_sizes(self, available_balance: Decimal, lend_order_quantity: Decimal) -> tuple[str]:
         orders_count = int(available_balance // lend_order_quantity)
-        order_sizes = (lend_order_quantity,) * orders_count + (available_balance - orders_count * lend_order_quantity,)
+        order_sizes = [lend_order_quantity] * orders_count
+        tail = available_balance - orders_count * lend_order_quantity
+        if tail < self.min_order_quantity:
+            if order_sizes:
+                order_sizes[0] += tail
+            else:
+                return tuple()
+        else:
+            order_sizes.append(tail)
         order_sizes = tuple(map(str, order_sizes))
         logger.debug(f"{available_balance=}; {order_sizes=}")
         return order_sizes
@@ -61,7 +70,7 @@ class LendHandler:
         balances: list[dict] = self.user_api.get_account_list(self.currency, self.account_type)
         balance = balances[0]
         whole_balance = (Decimal(balance["balance"]) - balance_reserve).quantize(Decimal("0"), ROUND_DOWN)
-        if whole_balance < 1:
+        if whole_balance < self.min_order_quantity:
             logger.debug(f"{whole_balance=}")
         else:
             if self.is_in_orders(balance):
@@ -69,11 +78,15 @@ class LendHandler:
 
             available_balance = (Decimal(balance["balance"]) - balance_reserve).quantize(Decimal("0"), ROUND_DOWN)
             if whole_balance != available_balance:
-                logger.warning(f"{whole_balance=} dont match {available_balance=}")
+                text = f"{whole_balance=} dont match {available_balance=}"
+                logger.warning(text)
+                send_mail(MAIL_ADDRESS, text, logger)
 
             int_rate = self.get_lend_daily_rate()
             if int_rate < min_daily_rate:
-                logger.warning(f"{int_rate=} is below {min_daily_rate=}")
+                text = f"{int_rate=} is below {min_daily_rate=}"
+                logger.warning(text)
+                send_mail(MAIL_ADDRESS, text, logger)
                 return
             int_rate = str(int_rate)
 
@@ -83,7 +96,9 @@ class LendHandler:
                     order_id = self.margin_api.create_lend_order(self.currency, order_size, int_rate, self.term)
                     logger.info(f"Created lend order:{self.currency=}; {order_size=}; {int_rate=}; {order_id}")
                 except Exception as e:
-                    logger.error(f"Failed creating order: {self.currency=}; {order_size=}; {int_rate=}; {e}")
+                    text = f"Failed creating order: {self.currency=}; {order_size=}; {int_rate=}; {e}"
+                    logger.error(text)
+                    send_mail(MAIL_ADDRESS, text, logger)
 
 
 def main():
@@ -92,7 +107,9 @@ def main():
         try:
             handler.process_currency_lending()
         except Exception as e:
-            logger.error(f"Exception while processing lending: {e}")
+            text = f"Exception while processing lending: {e}"
+            logger.error(text)
+            send_mail(MAIL_ADDRESS, text, logger)
         finally:
             time.sleep(30)
 

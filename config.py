@@ -21,3 +21,6 @@ API_PASSPHRASE = os.environ.get('API_PASSPHRASE')
 
 REDIS_HOST = os.environ.get('REDIS_HOST')
 REDIS_PORT = os.environ.get('REDIS_PORT')
+
+MAIL_ADDRESS = os.environ.get('MAIL_ADDRESS')
+MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
