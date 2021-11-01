@@ -8,8 +8,8 @@ from loguru import logger
 from kucoin.client import Margin, User
 from redis import Redis
 
-from config import API_KEY, API_SECRET, API_PASSPHRASE, BASE_DIR, LOGGING_LEVEL, MAIL_ADDRESS
-from connections import get_redis_connection
+from config import BASE_DIR, LOGGING_LEVEL, MAIL_ADDRESS
+from connections import get_redis_connection, get_margin_api, get_user_api
 from utils import get_items_from_paginated_result, send_mail
 
 
@@ -18,8 +18,8 @@ logger.add(sink=os.path.join(BASE_DIR, 'logs', "kucoin_lend.log"), level=LOGGING
 
 @dataclass
 class LendHandler:
-    margin_api: Margin = Margin(key=API_KEY, secret=API_SECRET, passphrase=API_PASSPHRASE)
-    user_api: User = User(key=API_KEY, secret=API_SECRET, passphrase=API_PASSPHRASE)
+    margin_api: Margin = get_margin_api()
+    user_api: User = get_user_api()
     term: int = 7
     currency: str = "USDT"
     account_type: str = "main"

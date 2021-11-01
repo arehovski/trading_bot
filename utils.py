@@ -1,8 +1,10 @@
+import json
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from config import MAIL_ADDRESS, MAIL_PASSWORD
+from connections import get_redis_connection, get_margin_api
 
 
 def get_items_from_paginated_result(endpoint) -> list:
@@ -25,3 +27,15 @@ def send_mail(to_address: str, text: str, logger) -> None:
         server.quit()
     except Exception as e:
         logger.error(f"Failed to send message: {e}")
+
+
+def get_active_list():
+    redis = get_redis_connection()
+    if active_list := redis.get("kucoin:active_list:USDT"):
+        active_list = json.loads(active_list)
+    else:
+        margin = get_margin_api()
+        active_list = get_items_from_paginated_result(margin.get_active_list)
+        active_list = json.dumps(active_list)
+        redis.set("kucoin:active_list:USDT", active_list, 300)
+    return active_list
