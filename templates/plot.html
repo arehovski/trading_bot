@@ -1,0 +1,18 @@
+<body>
+<div style="width: 100%;">
+    <div style="float:left; width: 50%">
+        <img src="data:image/png;base64,{{ active_list_distr_image }}">
+    </div>
+    <div style="float:right; width: 50%">
+        <img src="data:image/png;base64,{{ maturity_date_image }}">
+    </div>
+    <hr>
+    <div>
+        <div> Amount lent: <b>{{ amount }}</b></div>
+        <div> Weighted int rate: <b>{{ wavg_rate }}</b> % </div>
+        <div> Profit a day: <b>{{ a_day }}</b> </div>
+        <div> Profit a week: <b>{{ a_week }}</b> </div>
+        <div> Profit a month: <b>{{ a_month }}</b> </div>
+    </div>
+</div>
+</body>
