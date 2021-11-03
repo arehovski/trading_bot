@@ -6,13 +6,52 @@
     <div style="float:right; width: 50%">
         <img src="data:image/png;base64,{{ maturity_date_image }}">
     </div>
+</div>
     <hr>
-    <div>
+<div style="width: 100%; padding-top: 20px; padding-left: 40px">
+    <div style="float:left; width: 50%; font-size: 26px">
         <div> Amount lent: <b>{{ amount }}</b></div>
         <div> Weighted int rate: <b>{{ wavg_rate }}</b> % </div>
         <div> Profit a day: <b>{{ a_day }}</b> </div>
         <div> Profit a week: <b>{{ a_week }}</b> </div>
         <div> Profit a month: <b>{{ a_month }}</b> </div>
+    </div>
+    <div style="float:left; width: 50%;">
+        <form action="{{ url_for('bot_options') }}" method="post">
+            <table>
+                <tbody>
+                    <tr>
+                        <th>
+                            <label for="balance_reserve" >Balance reserve</label>
+                        </th>
+                        <td>
+                            <input type="number" step="1" min="0" name="balance_reserve" id="balance_reserve" value="{{ balance_reserve }}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label for="lend_order_quantity" >Lend order quantity</label>
+                        </th>
+                        <td>
+                            <input type="number" step="1" min="1" name="lend_order_quantity" id="lend_order_quantity" value="{{ lend_order_quantity }}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label for="min_daily_rate" >Minimal daily rate</label>
+                        </th>
+                        <td>
+                            <input type="number" step="0.00001" min="0.00001" name="min_daily_rate" id="min_daily_rate" value="{{ min_daily_rate }}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="submit" value="Save">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
     </div>
 </div>
 </body>

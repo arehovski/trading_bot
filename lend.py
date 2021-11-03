@@ -1,3 +1,4 @@
+import daemon
 import os
 import time
 from dataclasses import dataclass
@@ -65,7 +66,6 @@ class LendHandler:
         balance_reserve = Decimal(self.redis.get(f"kucoin:balance_reserve:{self.currency}") or 0)
         lend_order_quantity = Decimal(self.redis.get(f"kucoin:lend_order_quantity:{self.currency}") or 500)
         min_daily_rate = Decimal(self.redis.get(f"kucoin:min_daily_rate:{self.currency}") or "0.0005")
-        logger.debug(f"{balance_reserve=}; {lend_order_quantity=}; {min_daily_rate=}")
 
         balances: list[dict] = self.user_api.get_account_list(self.currency, self.account_type)
         balance = balances[0]

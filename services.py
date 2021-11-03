@@ -18,10 +18,11 @@ def get_active_list_dataset() -> pd.DataFrame:
         margin = get_margin_api()
         active_list = get_items_from_paginated_result(margin.get_active_list)
         active_list_json = json.dumps(active_list)
-        redis.set("kucoin:active_list:USDT", active_list_json, 120)
+        redis.set("kucoin:active_list:USDT", active_list_json, 20)
 
     df = pd.DataFrame(active_list)
-    df = df.astype({"size": "int64", "dailyIntRate": "float"})
+    df = df.astype({"size": "int64", "dailyIntRate": "float", 'repaid': "float"})
+    df["size"] = df["size"] - df['repaid'].astype('int64')
     return df
 
 
@@ -31,6 +32,7 @@ def get_plot_image(plot: Figure) -> str:
     output.seek(0)
     image = base64.b64encode(b"".join(output))
     image = image.decode("utf-8")
+    plt.close(plot)
     return image
 
 
@@ -49,7 +51,7 @@ def get_maturity_date_hist(df: pd.DataFrame) -> str:
         lambda item: round(((item["dailyIntRate"] * item["size"]).sum() / item["size"].sum()) * 100, 4)
     )
 
-    figure, ax1 = plt.subplots(figsize=(8, 5))
+    figure, ax1 = plt.subplots(figsize=(9, 5))
     color = 'tab:blue'
     ax1.set_xlabel("Maturity date")
     ax1.set_ylabel('Size', color=color)
