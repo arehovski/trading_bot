@@ -1,16 +1,16 @@
-import daemon
 import os
 import time
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_DOWN
 from functools import partial
 
+from celery import Celery
 from loguru import logger
 from kucoin.client import Margin, User
 from redis import Redis
 
 from config import BASE_DIR, LOGGING_LEVEL, MAIL_ADDRESS
-from connections import get_redis_connection, get_margin_api, get_user_api
+from connections import get_redis_connection, get_margin_api, get_user_api, get_celery_app
 from utils import get_items_from_paginated_result, send_mail
 
 
@@ -101,18 +101,21 @@ class LendHandler:
                     send_mail(MAIL_ADDRESS, text, logger)
 
 
-def main():
+celery_app = get_celery_app(__name__)
+celery_app.conf.beat_schedule = {
+    'process-lend-every-20-seconds': {
+        'task': 'lend.lend',
+        'schedule': 20.0,
+    },
+}
+
+
+@celery_app.task
+def lend():
     handler = LendHandler()
-    while True:
-        try:
-            handler.process_currency_lending()
-        except Exception as e:
-            text = f"Exception while processing lending: {e}"
-            logger.error(text)
-            send_mail(MAIL_ADDRESS, text, logger)
-        finally:
-            time.sleep(30)
-
-
-if __name__ == '__main__':
-    main()
+    try:
+        handler.process_currency_lending()
+    except Exception as e:
+        text = f"Exception while processing lending: {e}"
+        logger.error(text)
+        send_mail(MAIL_ADDRESS, text, logger)

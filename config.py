@@ -24,3 +24,5 @@ REDIS_PORT = os.environ.get('REDIS_PORT')
 
 MAIL_ADDRESS = os.environ.get('MAIL_ADDRESS')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+
+REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"

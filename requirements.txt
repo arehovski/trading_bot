@@ -1,6 +1,12 @@
+amqp==5.0.6
+billiard==3.6.4.0
+celery==5.1.2
 certifi==2021.10.8
 charset-normalizer==2.0.7
-click==8.0.3
+click==7.1.2
+click-didyoumean==0.3.0
+click-plugins==1.1.1
+click-repl==0.2.0
 cycler==0.11.0
 docutils==0.18
 Flask==2.0.2
@@ -8,6 +14,7 @@ idna==3.3
 itsdangerous==2.0.1
 Jinja2==3.0.2
 kiwisolver==1.3.2
+kombu==5.2.0
 kucoin-python==1.0.9
 lockfile==0.12.2
 loguru==0.5.3
@@ -16,6 +23,7 @@ matplotlib==3.4.3
 numpy==1.21.3
 pandas==1.3.4
 Pillow==8.4.0
+prompt-toolkit==3.0.21
 pyparsing==3.0.4
 python-daemon==2.3.0
 python-dateutil==2.8.2
@@ -25,5 +33,7 @@ redis==3.5.3
 requests==2.26.0
 six==1.16.0
 urllib3==1.26.7
+vine==5.0.0
+wcwidth==0.2.5
 websockets==10.0
 Werkzeug==2.0.2
