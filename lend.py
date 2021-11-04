@@ -14,7 +14,7 @@ from connections import get_redis_connection, get_margin_api, get_user_api, get_
 from utils import get_items_from_paginated_result, send_mail
 
 
-logger.add(sink=os.path.join(BASE_DIR, 'logs', "kucoin_lend.log"), level=LOGGING_LEVEL, rotation="5 MB")
+logger.add(sink=os.path.join(BASE_DIR, "logs", "kucoin_lend.log"), level=LOGGING_LEVEL, rotation="5 MB")
 
 
 @dataclass
@@ -24,7 +24,7 @@ class LendHandler:
     term: int = 7
     currency: str = "USDT"
     account_type: str = "main"
-    min_order_quantity = Decimal('10')
+    min_order_quantity = Decimal("10")
     redis: Redis = get_redis_connection()
 
     def get_lend_daily_rate(self) -> Decimal:
@@ -103,9 +103,9 @@ class LendHandler:
 
 celery_app = get_celery_app(__name__)
 celery_app.conf.beat_schedule = {
-    'process-lend-every-20-seconds': {
-        'task': 'lend.lend',
-        'schedule': 20.0,
+    "process-lend-every-20-seconds": {
+        "task": "lend.lend",
+        "schedule": 20.0,
     },
 }
 

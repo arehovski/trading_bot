@@ -21,8 +21,8 @@ def get_active_list_dataset() -> pd.DataFrame:
         redis.set("kucoin:active_list:USDT", active_list_json, 20)
 
     df = pd.DataFrame(active_list)
-    df = df.astype({"size": "int64", "dailyIntRate": "float", 'repaid': "float"})
-    df["size"] = df["size"] - df['repaid'].astype('int64')
+    df = df.astype({"size": "int64", "dailyIntRate": "float", "repaid": "float"})
+    df["size"] = df["size"] - df["repaid"].astype("int64")
     return df
 
 
@@ -52,17 +52,17 @@ def get_maturity_date_hist(df: pd.DataFrame) -> str:
     )
 
     figure, ax1 = plt.subplots(figsize=(9, 5))
-    color = 'tab:blue'
+    color = "tab:blue"
     ax1.set_xlabel("Maturity date")
-    ax1.set_ylabel('Size', color=color)
+    ax1.set_ylabel("Size", color=color)
     ax1.bar(df_grouped.index, df_grouped["size"], color=color)
-    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.tick_params(axis="y", labelcolor=color)
 
-    color = 'tab:red'
+    color = "tab:red"
     ax2 = ax1.twinx()
-    ax2.set_ylabel('Weighted av rates', color=color)
+    ax2.set_ylabel("Weighted av rates", color=color)
     ax2.plot(df_grouped.index, df_grouped["wavg_rates"], color=color)
-    ax2.tick_params(axis='y', labelcolor=color)
+    ax2.tick_params(axis="y", labelcolor=color)
     figure.tight_layout()
 
     return get_plot_image(figure)

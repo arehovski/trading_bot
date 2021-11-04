@@ -16,14 +16,12 @@ def get_items_from_paginated_result(endpoint) -> list:
 
 def send_mail(to_address: str, text: str, logger) -> None:
     try:
-        server = smtplib.SMTP_SSL('smtp.mail.ru', 465)
+        server = smtplib.SMTP_SSL("smtp.mail.ru", 465)
         server.login(MAIL_ADDRESS, MAIL_PASSWORD)
         msg = MIMEMultipart()
         msg["Subject"] = "Trading bot"
-        msg.attach(MIMEText(text, 'plain'))
+        msg.attach(MIMEText(text, "plain"))
         server.sendmail(MAIL_ADDRESS, to_address, msg.as_string())
         server.quit()
     except Exception as e:
         logger.error(f"Failed to send message: {e}")
-
-
