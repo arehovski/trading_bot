@@ -1,16 +1,15 @@
 import os
-import time
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_DOWN
 from functools import partial
 
-from celery import Celery
+from celery_app import celery_app
 from loguru import logger
 from kucoin.client import Margin, User
 from redis import Redis
 
 from config import BASE_DIR, LOGGING_LEVEL, MAIL_ADDRESS
-from connections import get_redis_connection, get_margin_api, get_user_api, get_celery_app
+from connections import get_redis_connection, get_margin_api, get_user_api
 from utils import get_items_from_paginated_result, send_mail
 
 
@@ -85,8 +84,11 @@ class LendHandler:
             int_rate = self.get_lend_daily_rate()
             if int_rate < min_daily_rate:
                 text = f"{int_rate=} is below {min_daily_rate=}"
-                logger.warning(text)
-                send_mail(MAIL_ADDRESS, text, logger)
+                key = "kucoin:int_rate:notify"
+                if not self.redis.get(key):
+                    send_mail(MAIL_ADDRESS, text, logger)
+                    logger.warning(text)
+                    self.redis.set("kucoin:int_rate:notify", bytes(True), 600)
                 return
             int_rate = str(int_rate)
 
@@ -99,15 +101,6 @@ class LendHandler:
                     text = f"Failed creating order: {self.currency=}; {order_size=}; {int_rate=}; {e}"
                     logger.error(text)
                     send_mail(MAIL_ADDRESS, text, logger)
-
-
-celery_app = get_celery_app(__name__)
-celery_app.conf.beat_schedule = {
-    "process-lend-every-20-seconds": {
-        "task": "lend.lend",
-        "schedule": 20.0,
-    },
-}
 
 
 @celery_app.task
