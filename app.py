@@ -17,22 +17,24 @@ def home():
     balance_reserve = redis.get("kucoin:balance_reserve:USDT")
     lend_order_quantity = redis.get("kucoin:lend_order_quantity:USDT")
     min_daily_rate = redis.get("kucoin:min_daily_rate:USDT")
-    kwargs.update({
-        'active_list_distr_image': active_list_distr_image,
-        'maturity_date_image': maturity_date_image,
-        'balance_reserve': balance_reserve,
-        'lend_order_quantity': lend_order_quantity,
-        'min_daily_rate': min_daily_rate
-    })
+    kwargs.update(
+        {
+            "active_list_distr_image": active_list_distr_image,
+            "maturity_date_image": maturity_date_image,
+            "balance_reserve": balance_reserve,
+            "lend_order_quantity": lend_order_quantity,
+            "min_daily_rate": min_daily_rate,
+        }
+    )
     return render_template("plot.html", **kwargs)
 
 
 @app.route("/bot_options", methods=["POST"])
 def bot_options():
-    balance_reserve = request.form.get('balance_reserve')
-    lend_order_quantity = request.form.get('lend_order_quantity')
-    min_daily_rate = request.form.get('min_daily_rate')
+    balance_reserve = request.form.get("balance_reserve")
+    lend_order_quantity = request.form.get("lend_order_quantity")
+    min_daily_rate = request.form.get("min_daily_rate")
     redis.set("kucoin:balance_reserve:USDT", balance_reserve)
     redis.set("kucoin:lend_order_quantity:USDT", lend_order_quantity)
     redis.set("kucoin:min_daily_rate:USDT", min_daily_rate)
-    return redirect('/')
+    return redirect("/")
