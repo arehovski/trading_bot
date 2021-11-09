@@ -1,6 +1,24 @@
 version: '3'
 
 services:
+  web:
+    build: .
+    command: gunicorn wsgi:app -b 0.0.0.0:8000
+    ports:
+      - '8000:8000'
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  services:
+    build: .
+    command: celery -A lend worker -B
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
   redis:
     container_name: tb-redis
     image: "redis:latest"

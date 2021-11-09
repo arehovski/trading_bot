@@ -12,16 +12,16 @@ from utils import send_mail
 
 def rent(url):
     logger.debug("Starting parse onliner")
+    redis = get_redis_connection()
+    key = "onliner:viewed_ads"
+    options = webdriver.FirefoxOptions()
+    options.add_argument("--headless")
+    driver = webdriver.Firefox(options=options, executable_path=os.path.join(BASE_DIR, 'geckodriver'))
+
     try:
-        redis = get_redis_connection()
-        key = "onliner:viewed_ads"
-        options = webdriver.FirefoxOptions()
-        options.add_argument("--headless")
-        driver = webdriver.Firefox(options=options, executable_path=os.path.join(BASE_DIR, 'geckodriver'))
         driver.get(url)
         items = driver.find_elements(by=By.XPATH, value="//a[@class='classified']")
         links = [item.get_attribute("href") for item in items]
-        driver.close()
         links = set(links)
         new_links = list(filter(lambda link: link not in redis.smembers(key), links))
         if new_links:
@@ -29,6 +29,8 @@ def rent(url):
             send_mail((MAIL_ADDRESS, "handyshopetsy@gmail.com"), "\n".join(new_links), subject="Onliner new rent ads")
     except Exception as e:
         send_mail(MAIL_ADDRESS, f"Failed to get new ads {e}", subject="Onliner new rent ads")
+    finally:
+        driver.quit()
 
 
 @celery_app.task

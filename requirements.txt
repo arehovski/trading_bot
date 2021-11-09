@@ -52,3 +52,4 @@ wcwidth==0.2.5
 websockets==10.0
 Werkzeug==2.0.2
 wsproto==1.0.0
+gunicorn
