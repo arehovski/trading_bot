@@ -23,7 +23,7 @@ class LendHandler:
     term: int = 7
     currency: str = "USDT"
     account_type: str = "main"
-    min_order_quantity = Decimal("10")
+    min_order_quantity = Decimal("50")
     redis: Redis = get_redis_connection()
 
     def get_lend_daily_rate(self) -> Decimal:
@@ -69,13 +69,15 @@ class LendHandler:
         balances: list[dict] = self.user_api.get_account_list(self.currency, self.account_type)
         balance = balances[0]
         whole_balance = (Decimal(balance["balance"]) - balance_reserve).quantize(Decimal("0"), ROUND_DOWN)
+        available_balance = Decimal(balance["available"])
+        self.redis.set(f"kucoin:available_balance:{self.currency}", str(available_balance))
+        available_balance = (available_balance - balance_reserve).quantize(Decimal("0"), ROUND_DOWN)
         if whole_balance < self.min_order_quantity:
             logger.debug(f"{whole_balance=}")
         else:
             if self.is_in_orders(balance):
                 self.cancel_active_orders()
 
-            available_balance = (Decimal(balance["balance"]) - balance_reserve).quantize(Decimal("0"), ROUND_DOWN)
             if whole_balance != available_balance:
                 text = f"{whole_balance=} dont match {available_balance=}"
                 logger.warning(text)
@@ -83,7 +85,7 @@ class LendHandler:
 
             int_rate = self.get_lend_daily_rate()
             if int_rate < min_daily_rate:
-                text = f"{int_rate=} is below {min_daily_rate=}"
+                text = f"{int_rate=} is below {min_daily_rate=}. {available_balance=}"
                 key = "kucoin:int_rate:notify"
                 if not self.redis.get(key):
                     send_mail(MAIL_ADDRESS, text, logger)
