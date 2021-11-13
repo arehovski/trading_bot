@@ -17,6 +17,7 @@ def home():
     balance_reserve = redis.get("kucoin:balance_reserve:USDT")
     lend_order_quantity = redis.get("kucoin:lend_order_quantity:USDT")
     min_daily_rate = redis.get("kucoin:min_daily_rate:USDT")
+    balance = redis.get("kucoin:available_balance:USDT")
     kwargs.update(
         {
             "active_list_distr_image": active_list_distr_image,
@@ -24,6 +25,7 @@ def home():
             "balance_reserve": balance_reserve,
             "lend_order_quantity": lend_order_quantity,
             "min_daily_rate": min_daily_rate,
+            "balance": balance
         }
     )
     return render_template("plot.html", **kwargs)
