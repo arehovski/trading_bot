@@ -90,7 +90,7 @@ class LendHandler:
                 if not self.redis.get(key):
                     send_mail(MAIL_ADDRESS, text, logger)
                     logger.warning(text)
-                    self.redis.set("kucoin:int_rate:notify", bytes(True), 600)
+                    self.redis.set("kucoin:int_rate:notify", bytes(True), 30*60)
                 return
             int_rate = str(int_rate)
 
