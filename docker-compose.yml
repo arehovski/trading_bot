@@ -19,7 +19,7 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/services
+      - .:/app
     depends_on:
       - redis
 
