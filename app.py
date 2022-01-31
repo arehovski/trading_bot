@@ -40,8 +40,3 @@ def bot_options():
     redis.set("kucoin:lend_order_quantity:USDT", lend_order_quantity)
     redis.set("kucoin:min_daily_rate:USDT", min_daily_rate)
     return redirect("/")
-
-
-@app.route("/received_interest", methods=["GET"])
-def received_interest():
-    pass

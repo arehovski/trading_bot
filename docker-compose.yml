@@ -13,6 +13,20 @@ services:
     depends_on:
       - redis
 
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    environment:
+      - APP_BACKEND_URL=web:8000
+      - APP_FRONTEND_PORT=3000
+    depends_on:
+      - web
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app/src
+
   services:
     build: .
     command: celery -A lend worker -B
