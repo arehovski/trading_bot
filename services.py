@@ -1,6 +1,7 @@
 import base64
 import io
 import json
+from functools import partial
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -10,7 +11,21 @@ from connections import get_redis_connection, get_margin_api
 from utils import get_items_from_paginated_result
 
 
+def get_active_list(currency: str):
+    redis = get_redis_connection()
+    key = f"kucoin:active_list:{currency}"
+    if active_list := redis.get(key):
+        active_list = json.loads(active_list)
+    else:
+        margin = get_margin_api()
+        active_list = get_items_from_paginated_result(partial(margin.get_active_list, currency=currency))
+        active_list_json = json.dumps(active_list)
+        redis.set(key, active_list_json, 20)
+    return active_list
+
+
 def get_active_list_dataset() -> pd.DataFrame:
+    # Deprecated
     redis = get_redis_connection()
     if active_list := redis.get("kucoin:active_list:USDT"):
         active_list = json.loads(active_list)

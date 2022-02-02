@@ -78,11 +78,6 @@ class LendHandler:
             if self.is_in_orders(balance):
                 self.cancel_active_orders()
 
-            if whole_balance != available_balance:
-                text = f"{whole_balance=} dont match {available_balance=}"
-                logger.warning(text)
-                send_mail(MAIL_ADDRESS, text, logger)
-
             int_rate = self.get_lend_daily_rate()
             if int_rate < min_daily_rate:
                 text = f"{int_rate=} is below {min_daily_rate=}. {available_balance=}"
@@ -90,7 +85,7 @@ class LendHandler:
                 if not self.redis.get(key):
                     send_mail(MAIL_ADDRESS, text, logger)
                     logger.warning(text)
-                    self.redis.set("kucoin:int_rate:notify", bytes(True), 30*60)
+                    self.redis.set("kucoin:int_rate:notify", bytes(True), 60*60)
                 return
             int_rate = str(int_rate)
 

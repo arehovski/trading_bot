@@ -14,3 +14,5 @@ dist/
 build/
 *.egg-info/
 *.pid
+
+frontend/node_modules

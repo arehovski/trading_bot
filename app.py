@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 
 from connections import get_redis_connection
-from services import get_active_list_dataset, get_active_list_hist, get_active_list_info, get_maturity_date_hist
-
+from services import get_active_list_dataset, get_active_list_hist, get_active_list_info, get_maturity_date_hist, \
+    get_active_list
 
 app = Flask(__name__)
 redis = get_redis_connection()
@@ -40,3 +40,22 @@ def bot_options():
     redis.set("kucoin:lend_order_quantity:USDT", lend_order_quantity)
     redis.set("kucoin:min_daily_rate:USDT", min_daily_rate)
     return redirect("/")
+
+
+@app.route("/active-list", methods=["GET"])
+def active_list():
+    return jsonify(get_active_list(currency=request.args.get("currency")))
+
+
+@app.route("/bot_settings", methods=["POST"])
+def bot_settings():
+    currency = request.args.get("currency")
+    data = {
+        "balance_reserve": request.json.get("balance_reserve"),
+        "lend_order_quantity": request.json.get("lend_order_quantity"),
+        "min_daily_rate": request.json.get("min_daily_rate")
+    }
+    for key, value in data.items():
+        redis.set(f"kucoin:{key}:{currency}")
+
+    return data
